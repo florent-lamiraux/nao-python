@@ -8,7 +8,30 @@ import hpp.corbaserver as hpc
 IP = "192.168.1.63"
 PORT = 9559
 
-jointList = ['HeadYaw', 'HeadPitch', 'LShoulderPitch', 'LShoulderRoll', 'LElbowYaw', 'LElbowRoll', 'LWristYaw', 'LHipYawPitch', 'LHipRoll', 'LHipPitch', 'LKneePitch', 'LAnklePitch', 'LAnkleRoll', 'RHipYawPitch', 'RHipRoll', 'RHipPitch', 'RKneePitch', 'RAnklePitch', 'RAnkleRoll', 'RShoulderPitch', 'RShoulderRoll', 'RElbowYaw', 'RElbowRoll', 'RWristYaw']
+jointNames = ['RHipYawPitch', 
+              'RHipRoll',
+              'RHipPitch',
+              'RKneePitch',
+              'RAnklePitch',
+              'RAnkleRoll',
+              'LShoulderPitch',
+              'LShoulderRoll',
+              'LElbowYaw',
+              'LElbowRoll',
+              'LWristYaw',
+              'LHipYawPitch',
+              'LHipRoll',
+              'LHipPitch',
+              'LKneePitch',
+              'LAnklePitch',
+              'LAnkleRoll',
+              'RShoulderPitch',
+              'RShoulderRoll',
+              'RElbowYaw',
+              'RElbowRoll',
+              'RWristYaw',
+              'HeadYaw',
+              'HeadPitch']
 
 def connect(host, port):
     global motionProxy
@@ -26,7 +49,7 @@ def getConfiguration():
     Read Nao's encoders and return configuration as a tuple of float.
     """
     config = [0.,0.,0.,0.,0.,0.]
-    jointAngles = motionProxy.getAngles("BodyJoints", True)
+    jointAngles = motionProxy.getAngles(jointNames, True)
     config.extend(jointAngles)
     config[6] = config[17]
     config[17] *= -1.
@@ -34,6 +57,6 @@ def getConfiguration():
 
 def trackRobot():
     client = hpc.Client()
-    for i in range(5000):
+    for i in range(500):
         config = getConfiguration()
         client.robot.setCurrentConfig(0, config)
