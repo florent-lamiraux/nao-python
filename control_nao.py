@@ -3,7 +3,7 @@
 from math import pi, cos, sin
 from naoqi import ALProxy
 
-IP = "140.93.255.83"
+IP = "192.168.1.63"
 PORT = 9559
 
 mp = ALProxy("ALMotion", IP, PORT)
