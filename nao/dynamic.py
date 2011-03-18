@@ -26,7 +26,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import nao
+from nao.config import allJoints, halfSitting
 from dynamic_graph.sot.core import FeatureGeneric, Task
 from dynamic_graph.sot.dynamics.parser import Parser
 from dynamic_graph.sot.dynamics.humanoid_robot import AbstractHumanoidRobot
@@ -36,8 +36,8 @@ class CompoundDrive (FeatureGeneric):
     def __init__(self, name, robot):
         FeatureGeneric.__init__(self, name)
         self.robot = robot
-        self.index1 = 6 + nao.allJoints.index('RHipYawPitch')
-        self.index2 = 6 + nao.allJoints.index('LHipYawPitch')
+        self.index1 = 6 + allJoints.index('RHipYawPitch')
+        self.index2 = 6 + allJoints.index('LHipYawPitch')
 
     def update(self):
         q = self.robot.signal('state').value
@@ -46,14 +46,14 @@ class CompoundDrive (FeatureGeneric):
         self.signal('errorIN').value = (q[i2]+q[i1],)
         self.signal('jacobianIN').value = (i1*(0.,) + (1.,) +
                                            (i2-i1-1)*(0.,) + (1.,) +
-                                           (6+len(nao.allJoints)-i2-1)*(0.,),)
+                                           (6+len(allJoints)-i2-1)*(0.,),)
 
 class Nao(AbstractHumanoidRobot):
     """
     This class instanciates a Nao robot as a humanoid robot
     """
 
-    halfSitting = tuple([0.,0.,.31,0.,0.,0.] + nao.halfSitting)
+    halfSitting = tuple([0.,0.,.31,0.,0.,0.] + halfSitting)
 
     def __init__(self, name, simulation, filename):
         AbstractHumanoidRobot.__init__(self, name, simulation)

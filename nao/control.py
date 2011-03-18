@@ -28,7 +28,7 @@
 
 from math import pi, cos, sin
 from naoqi import ALProxy
-from nao import allJoints, legJoints, upperJoints, halfSitting, IP, port
+from nao.config import allJoints, legJoints, upperJoints, halfSitting, IP, port
 
 mp = ALProxy("ALMotion", IP, port)
 tts = ALProxy("ALTextToSpeech", IP, port)
