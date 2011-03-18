@@ -28,38 +28,52 @@
 
 from math import pi, cos, sin
 from naoqi import ALProxy
+from nao import allJoints, legJoints, upperJoints, halfSitting, IP, port
 
-IP = "192.168.1.63"
-PORT = 9559
+mp = ALProxy("ALMotion", IP, port)
+tts = ALProxy("ALTextToSpeech", IP, port)
+ad = ALProxy('ALAudioDevice', IP, port)
+memProxy = ALProxy('ALMemory', IP, port)
+zeroStiffness = len(mp.getStiffnesses(allJoints)) * [0.]
+halfStiffness = len(mp.getStiffnesses(allJoints)) * [0.7]
+    
+def setStiffness(jointList, value):
+    """
+    Set the same stiffness value for a list of joints
+    """
+    mp.setStiffnesses(jointList, len(jointList)*[value])
 
-mp = ALProxy("ALMotion", IP, PORT)
-zeroStiffness = len(mp.getStiffnesses("BodyJoints")) * [0.]
+def closeHand(inHand):
+    mp.closeHand(inHand)
+    mp.setStiffnesses(inHand, 1.)
 
+def closeHands():
+    closeHand('RHand')
+    closeHand('LHand')
+
+def releaseHands():
+    mp.setStiffnesses(['RHand', 'LHand'], [0.,0.])
+    
     
 def playMotion(motion, time):
-    mp.setStiffnesses("Head", [0.5, 0.5])
-    mp.angleInterpolation("Head", motion, time, True)
-    mp.setStiffnesses("BodyJoints", zeroStiffness)
+    setStiffness(allJoints, 0.8)
+    mp.angleInterpolation(allJoints, motion, time, True)
 
-motion = []
-time = []
-timeSteps = []
-yaws = []
-pitches = []
-dt = 0.01
+def testMotion(motion, time):
+    setStiffness(allJoints, 0.4)
+    mp.angleInterpolation(allJoints, motion, time, True)
+    setStiffness(allJoints, 0.)
 
-for i in range(1,801):
-    t = dt*i
-    omega = 0.25*pi
-    yaw = 0.2*(1. - cos(omega*t))
-    pitch = 0.2*sin(omega*t)
-    yaws.append(yaw)
-    pitches.append(pitch)
-    timeSteps.append(t)
+def standUp():
+    setStiffness(allJoints, 0.8)
+    mp.angleInterpolation(allJoints, halfSitting,
+                          len(allJoints)*[[2.]], True)
 
-motion.append(yaws)
-motion.append(pitches)
-time.append(timeSteps)
-time.append(timeSteps)
+def pathToMotion(path, timeStep):
+    motion = list(map(list, zip(*path)))
+    motion = motion[6:]
+    times = len(motion)*[[timeStep*(i+1) for i in range(len(path))]]
+    return (motion, times)
 
-#playMotion(motion, time)
+
+#mp.setMotionConfig([["ENABLE_FOOT_CONTACT_PROTECTION",False]]) 

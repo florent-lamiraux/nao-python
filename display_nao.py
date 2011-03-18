@@ -4,34 +4,7 @@ Read position of joints and display robot configuration in KiteLab
 """
 from naoqi import ALProxy
 import hpp.corbaserver as hpc
-
-IP = "192.168.1.63"
-PORT = 9559
-
-jointNames = ['RHipYawPitch', 
-              'RHipRoll',
-              'RHipPitch',
-              'RKneePitch',
-              'RAnklePitch',
-              'RAnkleRoll',
-              'LShoulderPitch',
-              'LShoulderRoll',
-              'LElbowYaw',
-              'LElbowRoll',
-              'LWristYaw',
-              'LHipYawPitch',
-              'LHipRoll',
-              'LHipPitch',
-              'LKneePitch',
-              'LAnklePitch',
-              'LAnkleRoll',
-              'RShoulderPitch',
-              'RShoulderRoll',
-              'RElbowYaw',
-              'RElbowRoll',
-              'RWristYaw',
-              'HeadYaw',
-              'HeadPitch']
+from nao import allJoints, legJoints, upperJoints, halfSitting, IP, port
 
 def connect(host, port):
     global motionProxy
@@ -49,7 +22,7 @@ def getConfiguration():
     Read Nao's encoders and return configuration as a tuple of float.
     """
     config = [0.,0.,0.,0.,0.,0.]
-    jointAngles = motionProxy.getAngles(jointNames, True)
+    jointAngles = motionProxy.getAngles(allJoints, True)
     config.extend(jointAngles)
     config[6] = config[17]
     config[17] *= -1.
