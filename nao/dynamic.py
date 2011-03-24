@@ -32,21 +32,21 @@ from dynamic_graph.sot.dynamics.parser import Parser
 from dynamic_graph.sot.dynamics.humanoid_robot import AbstractHumanoidRobot
 
 # --- Coumpound drive ---------
-class CompoundDrive (FeatureGeneric):
-    def __init__(self, name, robot):
-        FeatureGeneric.__init__(self, name)
-        self.robot = robot
+class CompoundDrive (object):
+    def __init__(self, name, device):
+        self.featureGeneric = FeatureGeneric(name)
+        self.device = device
         self.index1 = 6 + allJoints.index('RHipYawPitch')
         self.index2 = 6 + allJoints.index('LHipYawPitch')
-
     def update(self):
-        q = self.robot.signal('state').value
+        q = self.device.signal('state').value
         i1 = self.index1
         i2 = self.index2
-        self.signal('errorIN').value = (q[i2]+q[i1],)
-        self.signal('jacobianIN').value = (i1*(0.,) + (1.,) +
-                                           (i2-i1-1)*(0.,) + (1.,) +
-                                           (6+len(allJoints)-i2-1)*(0.,),)
+        self.featureGeneric.signal('errorIN').value = (q[i2]+q[i1],)
+        self.featureGeneric.signal('jacobianIN').value = \
+            (i1*(0.,) + (1.,) +
+             (i2-i1-1)*(0.,) + (1.,) +
+             (6+len(allJoints)-i2-1)*(0.,),)
 
 class Nao(AbstractHumanoidRobot):
     """
@@ -55,18 +55,19 @@ class Nao(AbstractHumanoidRobot):
 
     halfSitting = tuple([0.,0.,.31,0.,0.,0.] + halfSitting)
 
-    def __init__(self, name, simulation, filename):
-        AbstractHumanoidRobot.__init__(self, name, simulation)
+    def __init__(self, name, filename):
+        AbstractHumanoidRobot.__init__(self, name)
 
-        p = Parser(self.name + '.dynamics', filename)
+        self.OperationalPoints.append('waist')
+        p = Parser(self.name + '_dynamic', filename)
         self.dynamic = p.parse()
         self.dimension = self.dynamic.getDimension()
         if self.dimension != len(self.halfSitting):
-            raise "invalid half-sitting pose"
+            raise RuntimeError("invalid half-sitting pose")
         self.initializeRobot()
-        self.compoundDrive = CompoundDrive(self.name + 'compoundDrive',
-                                           self.simu)
-        self.compoundDriveTask = Task(self.name + 'compoundDriveTask')
-        self.compoundDriveTask.add(self.name + 'compoundDrive')
+        self.compoundDrive = CompoundDrive(self.name + '_compoundDrive',
+                                           self.device)
+        self.compoundDriveTask = Task(self.name + '_compoundDriveTask')
+        self.compoundDriveTask.add(self.name + '_compoundDrive')
         self.compoundDriveTask.signal('controlGain').value = 1.
 
